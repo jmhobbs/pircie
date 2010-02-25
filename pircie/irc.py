@@ -17,23 +17,26 @@ class IRCBot ( irc.IRCClient ):
 
 	def connectionMade ( self ):
 		irc.IRCClient.connectionMade( self )
-		print "Connection Made"
+		for plugin in self.plugins.get_plugins_by_hook( 'MADE_CONNECTION' ):
+			plugin.MADE_CONNECTION()
 
 	def connectionLost( self, reason ):
 		irc.IRCClient.connectionLost( self, reason )
-		print "Connection Lost"
+		for plugin in self.plugins.get_plugins_by_hook( 'LOST_CONNECTION' ):
+			plugin.LOST_CONNECTION( reason )
 
 	def signedOn( self ):
-		print "Signed On"
+		for plugin in self.plugins.get_plugins_by_hook( 'SIGNED_ON' ):
+			plugin.SIGNED_ON()
 		self.join( self.channel )
 
 	def joined( self, channel ):
-		print "Joined:", channel
-		self.channel = self.channel
+		for plugin in self.plugins.get_plugins_by_hook( 'JOINED' ):
+			plugin.JOINED( channel )
 
 	def left( self, channel ):
-		print "Left:", channel
-		self.channel = None
+		for plugin in self.plugins.get_plugins_by_hook( 'LEFT' ):
+			plugin.LEFT( channel )
 
 	def try_say( self, msg ):
 		"""
@@ -46,22 +49,22 @@ class IRCBot ( irc.IRCClient ):
 			except: pass
 
 	def privmsg ( self, user, channel, msg ):
-		user = user.split('!', 1)[0]
-
 		if channel == self.nickname:
-			print "Whisper:", user, msg
-			return
-
-		print "Message:", user, msg, channel
+			for plugin in self.plugins.get_plugins_by_hook( 'WHISPER' ):
+				plugin.WHISPER( user, msg )
+		else:
+			for plugin in self.plugins.get_plugins_by_hook( 'MESSAGE' ):
+				plugin.MESSAGE( user, channel, msg )
 
 	def action ( self, user, channel, msg ):
-		print "Action:", user, channel, msg
+		for plugin in self.plugins.get_plugins_by_hook( 'ACTION' ):
+				plugin.ACTION( user, channel, msg )
 
 	def irc_NICK ( self, prefix, params ):
-		if self.logger:
-			old_nick = prefix.split('!')[0]
-			new_nick = params[0]
-			print "Nick Swap:", old_nick, new_nick
+		old_nick = prefix.split('!')[0]
+		new_nick = params[0]
+		for plugin in self.plugins.get_plugins_by_hook( 'NICK_CHANGE' ):
+			plugin.NICK_CHANGE( old_nick, new_nick )
 
 class IRCBotFactory( protocol.ReconnectingClientFactory ):
 
