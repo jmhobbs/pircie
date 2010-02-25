@@ -15,56 +15,67 @@ class IRCBot ( irc.IRCClient ):
 	channel = None
 	lineRate = 2
 
+	def try_say( self, message, silent=False ):
+		"""
+		Attempts to send the given message to the channel.
+		"""
+		try:
+			self.say( self.channel, message )
+			if not silent:
+				self.privmsg( self.nickname, self.channel, message )
+			return True
+		except:
+			return False
+
 	def connectionMade ( self ):
 		irc.IRCClient.connectionMade( self )
 		for plugin in self.plugins.get_plugins_by_hook( 'MADE_CONNECTION' ):
-			plugin.MADE_CONNECTION( self )
+			if False == plugin.MADE_CONNECTION( self ):
+				break
 
 	def connectionLost( self, reason ):
 		irc.IRCClient.connectionLost( self, reason )
 		for plugin in self.plugins.get_plugins_by_hook( 'LOST_CONNECTION' ):
-			plugin.LOST_CONNECTION( self, reason )
+			if False == plugin.LOST_CONNECTION( self, reason ):
+				break
 
 	def signedOn( self ):
 		for plugin in self.plugins.get_plugins_by_hook( 'SIGNED_ON' ):
-			plugin.SIGNED_ON( self)
+			if False == plugin.SIGNED_ON( self):
+				break
 		self.join( self.channel )
 
 	def joined( self, channel ):
 		for plugin in self.plugins.get_plugins_by_hook( 'JOINED' ):
-			plugin.JOINED( self, channel )
+			if False == plugin.JOINED( self, channel ):
+				break
 
 	def left( self, channel ):
 		for plugin in self.plugins.get_plugins_by_hook( 'LEFT' ):
-			plugin.LEFT( self, channel )
-
-	def try_say( self, msg ):
-		"""
-		Attempts to send the given message to the channel.
-		"""
-		if self.channel:
-			try:
-				self.say( self.channel, msg )
-				return True
-			except: pass
+			if False == plugin.LEFT( self, channel ):
+				break
 
 	def privmsg ( self, user, channel, msg ):
 		if channel == self.nickname:
 			for plugin in self.plugins.get_plugins_by_hook( 'WHISPER' ):
-				plugin.WHISPER( self, user, msg )
+				if False == plugin.WHISPER( self, user, msg ):
+					break
 		else:
 			for plugin in self.plugins.get_plugins_by_hook( 'MESSAGE' ):
-				plugin.MESSAGE( self, user, channel, msg )
+				if False == plugin.MESSAGE( self, user, channel, msg ):
+					break
 
 	def action ( self, user, channel, msg ):
 		for plugin in self.plugins.get_plugins_by_hook( 'ACTION' ):
-				plugin.ACTION( self, user, channel, msg )
+			if False == plugin.ACTION( self, user, channel, msg ):
+				break
 
 	def irc_NICK ( self, prefix, params ):
 		old_nick = prefix.split('!')[0]
 		new_nick = params[0]
 		for plugin in self.plugins.get_plugins_by_hook( 'NICK_CHANGE' ):
-			plugin.NICK_CHANGE( self, old_nick, new_nick )
+			if False == plugin.NICK_CHANGE( self, old_nick, new_nick ):
+				break
 
 class IRCBotFactory( protocol.ReconnectingClientFactory ):
 

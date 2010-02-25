@@ -32,6 +32,7 @@ def main ():
 	active_plugins = config.get( 'Configuration', 'plugins' ).split( ',' )
 	plugins = pircie.plugins.Plugins()
 	plugins.load_plugins( sys.path[0] + "/plugins", active_plugins  )
+	plugins.configure_plugins( bot_path, config )
 
 	factory = pircie.irc.IRCBotFactory( plugins, config.get( 'Configuration', 'channel' ), config.get( 'Configuration', 'nickname' ) )
 
