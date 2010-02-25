@@ -18,25 +18,25 @@ class IRCBot ( irc.IRCClient ):
 	def connectionMade ( self ):
 		irc.IRCClient.connectionMade( self )
 		for plugin in self.plugins.get_plugins_by_hook( 'MADE_CONNECTION' ):
-			plugin.MADE_CONNECTION()
+			plugin.MADE_CONNECTION( self )
 
 	def connectionLost( self, reason ):
 		irc.IRCClient.connectionLost( self, reason )
 		for plugin in self.plugins.get_plugins_by_hook( 'LOST_CONNECTION' ):
-			plugin.LOST_CONNECTION( reason )
+			plugin.LOST_CONNECTION( self, reason )
 
 	def signedOn( self ):
 		for plugin in self.plugins.get_plugins_by_hook( 'SIGNED_ON' ):
-			plugin.SIGNED_ON()
+			plugin.SIGNED_ON( self)
 		self.join( self.channel )
 
 	def joined( self, channel ):
 		for plugin in self.plugins.get_plugins_by_hook( 'JOINED' ):
-			plugin.JOINED( channel )
+			plugin.JOINED( self, channel )
 
 	def left( self, channel ):
 		for plugin in self.plugins.get_plugins_by_hook( 'LEFT' ):
-			plugin.LEFT( channel )
+			plugin.LEFT( self, channel )
 
 	def try_say( self, msg ):
 		"""
@@ -51,20 +51,20 @@ class IRCBot ( irc.IRCClient ):
 	def privmsg ( self, user, channel, msg ):
 		if channel == self.nickname:
 			for plugin in self.plugins.get_plugins_by_hook( 'WHISPER' ):
-				plugin.WHISPER( user, msg )
+				plugin.WHISPER( self, user, msg )
 		else:
 			for plugin in self.plugins.get_plugins_by_hook( 'MESSAGE' ):
-				plugin.MESSAGE( user, channel, msg )
+				plugin.MESSAGE( self, user, channel, msg )
 
 	def action ( self, user, channel, msg ):
 		for plugin in self.plugins.get_plugins_by_hook( 'ACTION' ):
-				plugin.ACTION( user, channel, msg )
+				plugin.ACTION( self, user, channel, msg )
 
 	def irc_NICK ( self, prefix, params ):
 		old_nick = prefix.split('!')[0]
 		new_nick = params[0]
 		for plugin in self.plugins.get_plugins_by_hook( 'NICK_CHANGE' ):
-			plugin.NICK_CHANGE( old_nick, new_nick )
+			plugin.NICK_CHANGE( self, old_nick, new_nick )
 
 class IRCBotFactory( protocol.ReconnectingClientFactory ):
 
