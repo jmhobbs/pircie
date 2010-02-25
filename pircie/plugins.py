@@ -24,7 +24,8 @@ class Plugins:
 						if name not in restrict:
 							continue
 					import_path = root.replace( path, '' )[1:] + '/plugin'
-					self.plugins[name] = __import__( import_path, None, None, [''] )
+					module = __import__( import_path, None, None, [''] )
+					self.plugins[name] = module.Plugin()
 					for hook in self.plugins[name].hooks:
 						if not self.hooks.has_key( hook ):
 							self.hooks[hook] = []
@@ -58,7 +59,7 @@ class Plugins:
 		"""
 		for name, plugin in self.plugins.items():
 			try:
-				if False == plugin.init( bot_path, config ):
+				if False == plugin.configure( bot_path, config ):
 					self.drop_plugin( name )
 			except AttributeError:
 				continue
