@@ -9,16 +9,16 @@ class IRCBot ( irc.IRCClient ):
 	versionNum = None
 	sourceURL = None
 	username = None
+	nickname = None
 	channel = None
 	lineRate = 3
-
-	instance = None
 
 	def __init__ ( self ):
 		self.versionName = self.factory.versionName
 		self.versionNum = self.factory.versionNum
 		self.sourceURL = self.factory.sourceURL
 		self.username = self.factory.username
+		self.nickname = self.factory.nickname
 		self.lineRate = self.factory.lineRate
 
 		irc.IRCClient.__init__( self )
@@ -75,9 +75,27 @@ class IRCBotFactory( protocol.ReconnectingClientFactory ):
 
 	protocol = IRCBot
 
-	def __init__( self, plugins, channel ):
+	def __init__( self, plugins, channel, nickname, **kwargs ):
 		self.plugins = plugins
 		self.channel = channel
+
+		# Set defaults
+		self.versionName = "pircie-bot"
+		self.versionNum = "0.1"
+		self.sourceURL = "http://github.com/jmhobbs/pircie"
+		self.username = "%s-%s" % ( self.versionName, self.versionNum )
+		self.nickname = nickname
+		self.lineRate = 2
+
+		# Now load our args
+		if 'versionName' in kwargs:
+			self.versionName = kwargs['versionName']
+		if 'versionNum' in kwargs:
+			self.versionNum = kwargs['versionNum']
+		if 'sourceURL' in kwargs:
+			self.sourceURL = kwargs['sourceURL']
+		if 'username' in kwargs:
+			self.username = kwargs['username']
 
 	def clientConnectionFailed( self, connector, reason ):
 		reactor.stop()

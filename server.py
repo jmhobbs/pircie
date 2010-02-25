@@ -2,10 +2,15 @@
 
 import sys
 
+from twisted.internet import reactor
+
 import pircie.plugins
+import pircie.irc
 
-p = pircie.plugins.Plugins( sys.path[0] + "/plugins" )
+plugins = pircie.plugins.Plugins()
+plugins.load_plugins( sys.path[0] + "/plugins" )
 
-print p.get_plugins_by_hook( 'TEST' )
-print p.get_plugins_by_hook( 'TESTB' )
+factory = pircie.irc.IRCBotFactory( plugins, 'pircie', 'pircie-bot' )
 
+reactor.connectTCP( 'chat.freenode.net', 6667, factory )
+reactor.run()

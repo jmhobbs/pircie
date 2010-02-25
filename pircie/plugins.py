@@ -8,9 +8,6 @@ class Plugins:
 	plugins = {}
 	hooks = {}
 
-	def __init__ ( self, path ):
-		self.load_plugins( path )
-
 	def load_plugins ( self, path ):
 		sys.path.append( path )
 		for root, dirs, files in os.walk( path ):
