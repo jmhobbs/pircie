@@ -28,8 +28,10 @@ def main ():
 	config = ConfigParser.SafeConfigParser()
 	config.read( bot_ini ) 
 
+
+	active_plugins = config.get( 'Configuration', 'plugins' ).split( ',' )
 	plugins = pircie.plugins.Plugins()
-	plugins.load_plugins( sys.path[0] + "/plugins" )
+	plugins.load_plugins( sys.path[0] + "/plugins", active_plugins  )
 
 	factory = pircie.irc.IRCBotFactory( plugins, config.get( 'Configuration', 'channel' ), config.get( 'Configuration', 'nickname' ) )
 
