@@ -5,23 +5,15 @@ from twisted.internet import reactor, protocol, task
 
 class IRCBot ( irc.IRCClient ):
 
-	versionName = None
-	versionNum = None
-	sourceURL = None
-	username = None
+	plugins = None
+
+	versionName = "pircie-bot"
+	versionNum = "0.1"
+	sourceURL = "http://github.com/jmhobbs/pircie"
+	username = "%s-%s" % ( versionName, versionNum )
 	nickname = None
 	channel = None
-	lineRate = 3
-
-	def __init__ ( self ):
-		self.versionName = self.factory.versionName
-		self.versionNum = self.factory.versionNum
-		self.sourceURL = self.factory.sourceURL
-		self.username = self.factory.username
-		self.nickname = self.factory.nickname
-		self.lineRate = self.factory.lineRate
-
-		irc.IRCClient.__init__( self )
+	lineRate = 2
 
 	def connectionMade ( self ):
 		irc.IRCClient.connectionMade( self )
@@ -33,11 +25,11 @@ class IRCBot ( irc.IRCClient ):
 
 	def signedOn( self ):
 		print "Signed On"
-		self.join( self.factory.channel )
+		self.join( self.channel )
 
 	def joined( self, channel ):
 		print "Joined:", channel
-		self.channel = self.factory.channel
+		self.channel = self.channel
 
 	def left( self, channel ):
 		print "Left:", channel
@@ -58,9 +50,9 @@ class IRCBot ( irc.IRCClient ):
 
 		if channel == self.nickname:
 			print "Whisper:", user, msg
+			return
 
-		if channel == self.channel:
-			print "Message:", user, msg
+		print "Message:", user, msg, channel
 
 	def action ( self, user, channel, msg ):
 		print "Action:", user, channel, msg
@@ -76,26 +68,20 @@ class IRCBotFactory( protocol.ReconnectingClientFactory ):
 	protocol = IRCBot
 
 	def __init__( self, plugins, channel, nickname, **kwargs ):
-		self.plugins = plugins
-		self.channel = channel
 
-		# Set defaults
-		self.versionName = "pircie-bot"
-		self.versionNum = "0.1"
-		self.sourceURL = "http://github.com/jmhobbs/pircie"
-		self.username = "%s-%s" % ( self.versionName, self.versionNum )
-		self.nickname = nickname
-		self.lineRate = 2
+		IRCBot.plugins = plugins
+		IRCBot.channel = channel
+		IRCBot.nickname = nickname
 
 		# Now load our args
 		if 'versionName' in kwargs:
-			self.versionName = kwargs['versionName']
+			IRCBot.versionName = kwargs['versionName']
 		if 'versionNum' in kwargs:
-			self.versionNum = kwargs['versionNum']
+			IRCBot.versionNum = kwargs['versionNum']
 		if 'sourceURL' in kwargs:
-			self.sourceURL = kwargs['sourceURL']
+			IRCBot.sourceURL = kwargs['sourceURL']
 		if 'username' in kwargs:
-			self.username = kwargs['username']
+			IRCBot.username = kwargs['username']
 
 	def clientConnectionFailed( self, connector, reason ):
 		reactor.stop()
