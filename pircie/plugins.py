@@ -59,6 +59,18 @@ class Plugins:
 		for name, plugin in self.plugins.items():
 			try:
 				if False == plugin.init( bot_path, config ):
-					del self.plugins[name]
+					self.drop_plugin( name )
 			except AttributeError:
 				continue
+	
+	def drop_plugin ( self, name ):
+		"""
+		Remove a plugin by name and all of it's hooks.
+		"""
+		if name in self.plugins:
+			del self.plugins[name]
+			for index,hook in self.hooks.items():
+				try:
+					self.hooks[index].remove( name )
+				except ValueError:
+					continue
