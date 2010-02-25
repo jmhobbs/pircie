@@ -18,12 +18,12 @@ class Plugins:
 		sys.path.append( path )
 		for root, dirs, files in os.walk( path ):
 			for file in files:
-				if file == 'plugin.py':
+				if file[-3:] == '.py':
 					if None != restrict:
-						name = root.replace( path, '' )[1:]
+						name = file[:-3]#root.replace( path, '' )[1:]
 						if name not in restrict:
 							continue
-					import_path = root.replace( path, '' )[1:] + '/plugin'
+					import_path = root.replace( path, '' )[1:] + "/" + name
 					module = __import__( import_path, None, None, [''] )
 					self.plugins[name] = module.Plugin()
 					for hook in self.plugins[name].hooks:
