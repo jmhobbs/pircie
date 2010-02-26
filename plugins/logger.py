@@ -11,6 +11,7 @@ class Plugin:
 	log_dir = None
 	log_date = None
 	log_handle = None
+	tty = False
 
 	def configure ( self, path, config ):
 
@@ -22,6 +23,9 @@ class Plugin:
 		if not os.path.exists( self.log_dir ):
 			print "ERROR: Logger could not find your log directory: %s" % self.log_dir
 			return False
+
+		if 'True' == config.get( 'logger', 'tty' ):
+			self.tty = True
 
 		self.log_date = time.strftime( "%Y-%m-%d", time.localtime( time.time() ) )
 
@@ -37,8 +41,11 @@ class Plugin:
 			self.log_date = time.strftime( "%Y-%m-%d", time.localtime( time.time() ) )
 			self.log_handle = open( self.log_dir + self.log_date + ".log", "a" )
 			self.log( '[log file rotation]' )
-		self.log_handle.write( '%s %s\n' % ( time.strftime( "[%H:%M:%S]", time.localtime( time.time() ) ), message ) )
+		log_line = '%s %s\n' % ( time.strftime( "[%H:%M:%S]", time.localtime( time.time() ) ), message )
+		self.log_handle.write( log_line )
 		self.log_handle.flush()
+		if self.tty:
+			print log_line,
 
 	def MESSAGE ( self, bot, user, channel, message ):
 		self.log( "[%s] <%s> %s" % ( channel, user.split( '!' )[0], message ) )
