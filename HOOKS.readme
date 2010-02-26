@@ -32,6 +32,12 @@
   Arguments: channel
 
 ## Exciting ones...
+* **ATME**
+
+  On reception of a non-whisper message directed at the bot.
+
+  Arguments: username, channel, message
+
 * **MESSAGE**
 
   On reception of a non-whisper message.

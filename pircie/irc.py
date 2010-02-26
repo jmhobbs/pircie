@@ -61,6 +61,13 @@ class IRCBot ( irc.IRCClient ):
 				if False == plugin.WHISPER( self, user, msg ):
 					break
 		else:
+			first_word = msg.split( ' ' )[0]
+			if first_word == self.nickname or first_word == self.nickname + ':' or first_word == '@' + self.nickname  or first_word == '@' + self.nickname + ':':
+				for plugin in self.plugins.get_plugins_by_hook( 'ATME' ):
+					atme_msg = " ".join( msg.split( ' ' )[1:] )
+					if False == plugin.ATME( self, user, channel, atme_msg ):
+						break
+		
 			for plugin in self.plugins.get_plugins_by_hook( 'MESSAGE' ):
 				if False == plugin.MESSAGE( self, user, channel, msg ):
 					break
