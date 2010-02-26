@@ -29,6 +29,7 @@ class Plugins:
 
 	plugins = {}
 	hooks = {}
+	plugin_objects = {}
 
 	def load_plugins ( self, path, restrict=None ):
 		"""
@@ -41,59 +42,61 @@ class Plugins:
 		for root, dirs, files in os.walk( path ):
 			for file in files:
 				if file[-3:] == '.py':
+					name = file[:-3]
 					if None != restrict:
-						name = file[:-3]#root.replace( path, '' )[1:]
 						if name not in restrict:
 							continue
 					import_path = root.replace( path, '' )[1:] + "/" + name
 					module = __import__( import_path, None, None, [''] )
-					self.plugins[name] = module.Plugin()
-					for hook in self.plugins[name].hooks:
-						if not self.hooks.has_key( hook ):
-							self.hooks[hook] = []
-						self.hooks[hook].append( name )
+					self.plugins[name] = module
 
-	def order_plugins ( self, order ):
+	def plugin_chain ( self, chain ):
 		"""
-		Attempt to put loaded plugins in a given order.
+		Set up the hooks according to the given chain.
 		"""
-		if None != order:
+		for pair in chain:
+			name,plugin = pair
+			if not self.plugins.has_key( plugin ):
+				print 'ERROR: Plugin "%s" not loaded!' % plugin
+			else:
+				self.plugin_objects[name] = self.plugins[plugin].Plugin()
+				for hook in self.plugin_objects[name].hooks:
+					if not self.hooks.has_key( hook ):
+						self.hooks[hook] = []
+					self.hooks[hook].append( name )
+	
+	def configure_plugins ( self, bot_path, config ):
+		"""
+		Attempt to configure loaded plugins.
+		"""
+		for name,plugin in self.plugin_objects.items():
+			try:
+				if False == plugin.configure( bot_path, config, name ):
+					self.drop_plugin( name )
+			except AttributeError:
+				continue
+			except Exception, e:
+				print "ERROR: Problem configuring plugin %s: %s" % ( name, e )
+				self.drop_plugin( name )
+	
+	def drop_plugin ( self, name ):
+		"""
+		Remove a plugin object by name and all of it's hooks.
+		"""
+		if name in self.plugin_objects:
+			del self.plugin_objects[name]
 			for index,hook in self.hooks.items():
-				new_plugins = []
-				for plugin in order:
-					if plugin in hook:
-						new_plugins.append( plugin )
-				self.hooks[index] = new_plugins
-
+				try:
+					self.hooks[index].remove( name )
+				except ValueError:
+					continue
+					
 	def get_plugins_by_hook ( self, hook ):
 		"""
 		Get all the needed plugins, in order, for a hook.
 		"""
 		plugins = []
 		if self.hooks.has_key( hook ):
-			for plugin in self.hooks[hook]:
-				plugins.append( self.plugins[plugin] )
+			for name in self.hooks[hook]:
+				plugins.append( self.plugin_objects[name] )
 		return plugins
-	
-	def configure_plugins ( self, bot_path, config ):
-		"""
-		Attempt to configure loaded plugins.
-		"""
-		for name, plugin in self.plugins.items():
-			try:
-				if False == plugin.configure( bot_path, config ):
-					self.drop_plugin( name )
-			except AttributeError:
-				continue
-	
-	def drop_plugin ( self, name ):
-		"""
-		Remove a plugin by name and all of it's hooks.
-		"""
-		if name in self.plugins:
-			del self.plugins[name]
-			for index,hook in self.hooks.items():
-				try:
-					self.hooks[index].remove( name )
-				except ValueError:
-					continue

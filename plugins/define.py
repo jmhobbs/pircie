@@ -22,10 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# We need to get sdictviewer into the path, part of the price we pay to be plugins
 import os.path
-import sys
-sys.path.append( os.path.dirname(__file__) )
 
 import sdictviewer.formats.dct.sdict as sdict
 import sdictviewer.dictutil
@@ -36,14 +33,15 @@ class Plugin:
 
 	dictionary = None
 
-	def configure ( self, path, config ):
+	def configure ( self, path, config, name ):
 		try:
-			if os.path.isabs( config.get( 'define', 'dictionary' ) ):
-				self.dictionary = sdict.SDictionary( config.get( 'define', 'dictionary' ) )
+			if os.path.isabs( config.get( name, 'dictionary' ) ):
+				self.dictionary = sdict.SDictionary( config.get( name, 'dictionary' ) )
 			else:
-				self.dictionary = sdict.SDictionary( path + config.get( 'define', 'dictionary' ) )
+				self.dictionary = sdict.SDictionary( path + config.get( name, 'dictionary' ) )
 			self.dictionary.load()
-		except:
+		except Exception, e:
+			print "ERROR: Problem loading define plugin:", e
 			return False
 
 	def ATME ( self, bot, user, channel, message ):

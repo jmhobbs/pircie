@@ -35,18 +35,18 @@ class Plugin:
 	log_handle = None
 	tty = False
 
-	def configure ( self, path, config ):
+	def configure ( self, path, config, name ):
 
-		if os.path.isabs( config.get( 'logger', 'directory' ) ):
-			self.log_dir = config.get( 'logger', 'directory' )
+		if os.path.isabs( config.get( name, 'directory' ) ):
+			self.log_dir = config.get( name, 'directory' )
 		else:
-			self.log_dir = path + config.get( 'logger', 'directory' )
+			self.log_dir = path + config.get( name, 'directory' )
 
 		if not os.path.exists( self.log_dir ):
 			print "ERROR: Logger could not find your log directory: %s" % self.log_dir
 			return False
 
-		if 'True' == config.get( 'logger', 'tty' ):
+		if 'True' == config.get( name, 'tty' ):
 			self.tty = True
 
 		self.log_date = time.strftime( "%Y-%m-%d", time.localtime( time.time() ) )

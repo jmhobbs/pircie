@@ -34,6 +34,9 @@ import pircie.irc
 
 def main ():
 
+	# Add plugin libraries to lib
+	sys.path.append( sys.path[0] + "/lib/" )
+
 	parser = OptionParser( "usage: %prog [options] BOT_INI" )
 	parser.add_option( "-d", "--dev", action="store_true", dest="dev_mode", default=False, help="run in dev mode" )
 	(options, args) = parser.parse_args()
@@ -54,10 +57,14 @@ def main ():
 	config = ConfigParser.SafeConfigParser()
 	config.read( bot_ini ) 
 
-	active_plugins = config.get( 'Configuration', 'plugins' ).split( ',' )
+	plugins_config = config.get( 'Configuration', 'plugins' ).split( ',' )
+	chain = []
+	for pair in plugins_config:
+		chain.append( pair.split( '|' ) )
 
 	plugins = pircie.plugins.Plugins()
-	plugins.load_plugins( sys.path[0] + "/plugins", active_plugins  )
+	plugins.load_plugins( sys.path[0] + "/plugins" )
+	plugins.plugin_chain( chain )
 	plugins.configure_plugins( bot_path, config )
 
 	if 0 == len( plugins.plugins ):
@@ -67,6 +74,9 @@ def main ():
 	if options.dev_mode:
 		print "-" * 10, "[ Loaded Plugins ]", "-" * 10
 		for name,plugin in plugins.plugins.items():
+			print name
+		print "-" * 10, "[ Plugins Objects ]", "-" * 10
+		for name,plugin in plugins.plugin_objects.items():
 			print name
 		print "-" * 10, "[ Loaded Hooks ]", "-" * 10
 		for hook,plgs in plugins.hooks.items():
