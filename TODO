@@ -1,3 +1,8 @@
 * Path handling is sloppy and not cross platform.
 * Actions should have a timestamp appended, so that things process in order (i.e. define > try_say > logger > logger )
 * You should be able to have multiple instances of a plugin in your chain, with different configurations.
+* Add "description" to all of the Plugins
+* All of the Plugins should be deriving from a single class.
+* Add a plugin documentation browser (see the plugins installed, see descriptions and config variables)
+* Add plugin dependencies
+* Add asynchronous plugins
