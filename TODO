@@ -1,1 +1,3 @@
-Path handling is sloppy and not cross platform.
+* Path handling is sloppy and not cross platform.
+* Actions should have a timestamp appended, so that things process in order (i.e. define > try_say > logger > logger )
+* You should be able to have multiple instances of a plugin in your chain, with different configurations.
